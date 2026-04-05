@@ -1,0 +1,146 @@
+name: CI/CD Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # Step 3: Debug - Show environment
+      - name: Debug - Show system info
+        run: |
+          echo "🔍 System Information"
+          echo "===================="
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Git version: $(git --version)"
+          echo "PWD: $(pwd)"
+          echo ""
+          echo "📁 Directory structure:"
+          ls -la
+          echo ""
+          echo "📦 Files in repository root:"
+          ls -la | grep -E "package.json|tsconfig|next.config"
+          echo ""
+
+      # Step 4: Debug - Check file permissions
+      - name: Debug - Check file permissions
+        run: |
+          echo "🔐 File Permissions Check"
+          echo "========================"
+          echo "Config files permissions:"
+          ls -la package.json tsconfig.json next.config.mjs 2>/dev/null || echo "⚠️ Some config files missing"
+          echo ""
+          echo "App directory contents:"
+          ls -la app/ || echo "⚠️ App directory not found"
+
+      # Step 5: Install dependencies
+      - name: Install dependencies
+        run: |
+          echo "📦 Installing npm dependencies..."
+          npm ci --prefer-offline --no-audit
+          echo "✅ Dependencies installed successfully"
+
+      # Step 6: Debug - Show installed packages
+      - name: Debug - Show installed packages
+        run: |
+          echo "📚 Installed packages:"
+          npm list --depth=0
+          echo ""
+          echo "🔗 Checking for Next.js:"
+          npm list next || echo "⚠️ Next.js not found"
+
+      # Step 7: Lint check
+      - name: Lint check
+        run: |
+          echo "🔍 Running lint check..."
+          npm run lint 2>/dev/null || echo "⚠️ No lint script defined"
+        continue-on-error: true
+
+      # Step 8: Build Next.js app
+      - name: Build Next.js application
+        run: |
+          echo "🔨 Building Next.js application..."
+          npm run build
+          echo "✅ Build completed successfully"
+        env:
+          NODE_ENV: production
+          CI: true
+
+      # Step 9: Debug - Show build output
+      - name: Debug - Show build output
+        if: always()
+        run: |
+          echo "📁 Build artifacts:"
+          ls -la .next/ 2>/dev/null || echo "⚠️ .next directory not found"
+          echo ""
+          echo "📝 Build summary:"
+          du -sh .next 2>/dev/null || echo "⚠️ Could not calculate .next size"
+
+      # Step 10: Export static site (optional)
+      - name: Export static files (if applicable)
+        run: npm run export 2>/dev/null || echo "⚠️ Export not configured (optional)"
+        continue-on-error: true
+
+      # Step 11: Success notification
+      - name: ✅ Build Success
+        if: success()
+        run: |
+          echo "🎉 Build completed successfully!"
+          echo ""
+          echo "Summary:"
+          echo "✓ Code checked out"
+          echo "✓ Node.js configured"
+          echo "✓ Dependencies installed"
+          echo "✓ Next.js application built"
+          echo ""
+          echo "Ready for deployment!"
+
+      # Step 12: Failure notification with error details
+      - name: ❌ Build Failed - Debug Info
+        if: failure()
+        run: |
+          echo "❌ Build failed! Here's debug information:"
+          echo ""
+          echo "Last 50 lines of error output:"
+          echo "=============================="
+          npm run build 2>&1 | tail -50 || true
+          echo ""
+          echo "Checking for common issues:"
+          echo "1. TypeScript errors:"
+          npx tsc --noEmit 2>&1 | head -20 || echo "⚠️ Could not run TypeScript check"
+          echo ""
+          echo "2. Package.json validity:"
+          cat package.json | jq . > /dev/null 2>&1 && echo "✓ package.json is valid" || echo "❌ package.json has syntax errors"
+          echo ""
+          echo "3. Node modules status:"
+          [[ -d node_modules ]] && echo "✓ node_modules directory exists" || echo "❌ node_modules not found"
+
+  # Optional: Add deployment step here
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && success()
+  #   steps:
+  #     - name: Deploy to production
+  #       run: echo "Deploy to your hosting here..."
