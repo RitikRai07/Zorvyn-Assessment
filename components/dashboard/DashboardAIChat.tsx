@@ -57,16 +57,16 @@ export function DashboardAIChat({ transactions, accountBalance }: DashboardAICha
       const expenseTransactions = transactions.filter(t => t.type === 'expense')
       const avgExpense = totalExpense / (expenseTransactions.length || 1)
       const monthlyAvg = (totalExpense / 12).toFixed(0)
-      const expensePercent = totalIncome > 0 ? ((totalExpense / totalIncome) * 100).toFixed(1) : 0
+      const expensePercentNum = totalIncome > 0 ? parseFloat(((totalExpense / totalIncome) * 100).toFixed(1)) : 0
       
-      return `📉 **Expense Analysis & Insights**\n\n**Total Expenses**: ${formatCurrency(totalExpense)}\n**Number of Transactions**: ${expenseTransactions.length}\n**Average per Transaction**: ${formatCurrency(avgExpense)}\n**Monthly Average**: ${formatCurrency(parseFloat(monthlyAvg))}\n**% of Income**: ${expensePercent}%\n\n💡 **Insight**: You're spending ${expensePercent}% of your income. ${expensePercent > 70 ? '⚠️ Consider reducing expenses.' : '✅ Good expense management!'}`
+      return `📉 **Expense Analysis & Insights**\n\n**Total Expenses**: ${formatCurrency(totalExpense)}\n**Number of Transactions**: ${expenseTransactions.length}\n**Average per Transaction**: ${formatCurrency(avgExpense)}\n**Monthly Average**: ${formatCurrency(parseFloat(monthlyAvg))}\n**% of Income**: ${expensePercentNum.toFixed(1)}%\n\n💡 **Insight**: You're spending ${expensePercentNum.toFixed(1)}% of your income. ${expensePercentNum > 70 ? '⚠️ Consider reducing expenses.' : '✅ Good expense management!'}`
     }
 
     if (message.includes('summary') || message.includes('overview') || message === 'hi' || message === 'hello') {
-      const expensePercent = totalIncome > 0 ? ((totalExpense / totalIncome) * 100).toFixed(1) : 0
-      const savingsRate = totalIncome > 0 ? ((savings / totalIncome) * 100).toFixed(1) : 0
+      const expensePercentNum = totalIncome > 0 ? parseFloat(((totalExpense / totalIncome) * 100).toFixed(1)) : 0
+      const savingsRateNum = totalIncome > 0 ? parseFloat(((savings / totalIncome) * 100).toFixed(1)) : 0
       
-      return `📊 **Complete Financial Dashboard Summary**\n\n💰 **Account Balance**: ${formatCurrency(accountBalance)}\n📈 **Total Income**: ${formatCurrency(totalIncome)}\n📉 **Total Expenses**: ${formatCurrency(totalExpense)}\n✅ **Total Savings**: ${formatCurrency(savings)}\n\n**Metrics**:\n• Savings Rate: **${savingsRate}%**\n• Expense Ratio: **${expensePercent}%**\n• Transactions: **${transactions.length}**\n\n${savings > 0 ? '✨ Excellent! Keep up the good saving habits!' : '⚠️ Your expenses exceed income. Review your spending.'}`
+      return `📊 **Complete Financial Dashboard Summary**\n\n💰 **Account Balance**: ${formatCurrency(accountBalance)}\n📈 **Total Income**: ${formatCurrency(totalIncome)}\n📉 **Total Expenses**: ${formatCurrency(totalExpense)}\n✅ **Total Savings**: ${formatCurrency(savings)}\n\n**Metrics**:\n• Savings Rate: **${savingsRateNum.toFixed(1)}%**\n• Expense Ratio: **${expensePercentNum.toFixed(1)}%**\n• Transactions: **${transactions.length}**\n\n${savings > 0 ? '✨ Excellent! Keep up the good saving habits!' : '⚠️ Your expenses exceed income. Review your spending.'}`
     }
 
     if (message.includes('category') || message.includes('spending')) {
@@ -78,15 +78,16 @@ export function DashboardAIChat({ transactions, accountBalance }: DashboardAICha
     }
 
     if (message.includes('savings') || message.includes('save')) {
-      const savingsRate = totalIncome > 0 ? ((savings / totalIncome) * 100).toFixed(1) : 0
+      const savingsRateNum = totalIncome > 0 ? parseFloat(((savings / totalIncome) * 100).toFixed(1)) : 0
       const savingsGoal = (totalIncome * 0.2).toFixed(0) // 20% savings goal
       const onTrack = savings >= parseFloat(savingsGoal)
       
-      return `💚 **Comprehensive Savings Analysis**\n\n**Total Savings**: ${formatCurrency(savings)}\n**Savings Rate**: **${savingsRate}%**\n**Savings Goal (20%)**: ${formatCurrency(parseFloat(savingsGoal))}\n**Status**: ${onTrack ? '✅ On Track!' : '📍 ' + formatCurrency(parseFloat(savingsGoal) - savings) + ' away from goal'}\n\n${savingsRate > 20 ? '🎉 Excellent savings rate! Keep it up!' : savingsRate > 10 ? '👍 Good progress! Aim for 20%.' : '📈 Focus on increasing your savings rate.'}`
+      return `💚 **Comprehensive Savings Analysis**\n\n**Total Savings**: ${formatCurrency(savings)}\n**Savings Rate**: **${savingsRateNum.toFixed(1)}%**\n**Savings Goal (20%)**: ${formatCurrency(parseFloat(savingsGoal))}\n**Status**: ${onTrack ? '✅ On Track!' : '📍 ' + formatCurrency(parseFloat(savingsGoal) - savings) + ' away from goal'}\n\n${savingsRateNum > 20 ? '🎉 Excellent savings rate! Keep it up!' : savingsRateNum > 10 ? '👍 Good progress! Aim for 20%.' : '📈 Focus on increasing your savings rate.'}`
     }
 
     if (message.includes('advice') || message.includes('suggest') || message.includes('recommend')) {
-      return `💡 **Financial Recommendations**\n\n1. **Track Spending**: Monitor your ${topCategory?.category || 'expenses'} closely\n2. **Set Budget**: Allocate 20-30% of income to savings\n3. **Review Monthly**: Analyze spending patterns regularly\n4. **Reduce Waste**: Look for non-essential expenses to cut\n5. **Build Emergency Fund**: Target 3-6 months of expenses\n\nYour current financial health: **${savingsRate > 20 ? '💪 Strong' : savingsRate > 10 ? '📊 Good' : '📈 Improving'}**`
+      const savingsRateNum = totalIncome > 0 ? parseFloat(((savings / totalIncome) * 100).toFixed(1)) : 0
+      return `💡 **Financial Recommendations**\n\n1. **Track Spending**: Monitor your ${topCategory?.category || 'expenses'} closely\n2. **Set Budget**: Allocate 20-30% of income to savings\n3. **Review Monthly**: Analyze spending patterns regularly\n4. **Reduce Waste**: Look for non-essential expenses to cut\n5. **Build Emergency Fund**: Target 3-6 months of expenses\n\nYour current financial health: **${savingsRateNum > 20 ? '💪 Strong' : savingsRateNum > 10 ? '📊 Good' : '📈 Improving'}**`
     }
 
     if (message.includes('how') || message.includes('help') || message.includes('?')) {
