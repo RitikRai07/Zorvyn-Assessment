@@ -13,7 +13,7 @@ import {
   getNetIncome,
   getSavingsRate,
 } from '@/lib/utils/calculations'
-import { MessageCircle, X, Send, Minimize2, Maximize2, Volume2 } from 'lucide-react'
+import { MessageCircle, X, Send, Minimize2, Maximize2, Mic, Copy, Check } from 'lucide-react'
 
 interface Message {
   id: string
@@ -21,6 +21,13 @@ interface Message {
   content: string
   timestamp: Date
 }
+
+const SUGGESTIONS = [
+  { icon: '💰', text: 'Show my balance', query: 'What is my total balance?' },
+  { icon: '📊', text: 'Spending insights', query: 'Where did I spend the most?' },
+  { icon: '💎', text: 'Savings tips', query: 'How can I save more?' },
+  { icon: '🎯', text: 'Financial goals', query: 'Tell me about goals' },
+]
 
 interface FloatingChatbotProps {
   transactions: Transaction[]
@@ -34,19 +41,28 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
     {
       id: '1',
       type: 'bot',
-      content: `🎉 Welcome to **Zorvyn Finance**! I'm your intelligent financial assistant, powered by AI. I have complete knowledge of your dashboard, transactions, goals, and spending patterns. Ask me anything! 💰`,
+      content: `🎉 Welcome to **Zorvyn Finance**! I'm your intelligent financial assistant. Ask me anything about your finances! 💰`,
       timestamp: new Date(),
     },
   ])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages])
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const generateBotResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase()
@@ -144,26 +160,24 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
     return `✨ **Smart Question!** 💭\n\nI have full knowledge of:\n📊 Your dashboard & features\n💰 All transactions & analytics\n🎯 Goals & targets\n📈 Spending patterns\n🏢 Zorvyn capabilities\n\n**I can help with:**\n• Zorvyn info & features\n• Goals management\n• Budget planning\n• Spending analysis\n• Financial tips\n• Recommendations\n• Share links\n• Dashboard guidance\n\nWhat would you like to know? 🚀`
   }
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim() || isLoading) return
+  const handleSendMessage = (message?: string) => {
+    const textToSend = message || inputValue.trim()
+    if (!textToSend || isLoading) return
 
-    const userMessage = inputValue.trim()
     setInputValue('')
-
-    // Add user message
     const newUserMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
-      content: userMessage,
+      content: textToSend,
       timestamp: new Date(),
     }
 
     setMessages(prev => [...prev, newUserMessage])
     setIsLoading(true)
 
-    // Simulate typing delay
-    const timer = setTimeout(() => {
-      const botResponse = generateBotResponse(userMessage)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      const botResponse = generateBotResponse(textToSend)
       const newBotMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
@@ -172,10 +186,53 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
       }
       setMessages(prev => [...prev, newBotMessage])
       setIsLoading(false)
-    }, 300)
+    }, 600)
+  }
 
-    // Cleanup timer on unmount
-    return () => clearTimeout(timer)
+  const handleVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert('Voice input not supported in your browser')
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.language = 'en-US'
+    setIsListening(true)
+    playSound('open')
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0].transcript)
+        .join('')
+      
+      if (transcript.trim()) {
+        setInputValue(transcript)
+        setTimeout(() => handleSendMessage(transcript), 200)
+      }
+      setIsListening(false)
+    }
+
+    recognition.onerror = () => {
+      setIsListening(false)
+      playSound('close')
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognition.start()
+  }
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+  }
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
   }
 
   return (
@@ -243,27 +300,60 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
             {/* Messages - Enhanced */}
             {!isMinimized && (
               <>
-                <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-background/50 from-0% to-background to-100%">
-                  <div className="space-y-4">
+                <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-background/50 from-0% to-background to-100% overflow-y-auto">
+                  <div className="space-y-3 pr-4">
+                    {messages.length === 1 && !isLoading && (
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        {SUGGESTIONS.map((sugg, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleSendMessage(sugg.query)}
+                            className="text-left p-3 rounded-lg bg-muted/60 hover:bg-primary/20 transition-all border border-primary/20 hover:border-primary/50"
+                          >
+                            <div className="text-xl mb-1">{sugg.icon}</div>
+                            <div className="text-xs font-medium text-foreground">{sugg.text}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     {messages.map(message => (
                       <div
                         key={message.id}
-                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn group`}
                       >
-                        <div
-                          className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed font-medium ${
-                            message.type === 'user'
-                              ? 'bg-gradient-to-r from-primary to-secondary text-white rounded-br-none shadow-lg'
-                              : 'bg-muted text-foreground rounded-bl-none border border-primary/20 shadow-md'
-                          } whitespace-pre-wrap backdrop-blur-sm`}
-                        >
-                          {message.content}
+                        <div className={`flex flex-col ${message.type === 'user' ? 'items-end' : 'items-start'} gap-1 max-w-[85%]`}>
+                          <div
+                            className={`rounded-xl px-4 py-3 text-sm leading-relaxed ${
+                              message.type === 'user'
+                                ? 'bg-gradient-to-r from-primary to-secondary text-white rounded-br-none shadow-lg'
+                                : 'bg-muted/80 text-foreground rounded-bl-none border border-primary/30 shadow-md'
+                            }`}
+                          >
+                            {message.content}
+                          </div>
+                          <div className={`flex gap-2 items-center mx-1 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <span className="text-xs text-muted-foreground">{formatTime(message.timestamp)}</span>
+                            {message.type === 'bot' && (
+                              <button
+                                onClick={() => copyToClipboard(message.content, message.id)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded text-xs"
+                              >
+                                {copiedId === message.id ? (
+                                  <Check className="w-3 h-3 text-green-500" />
+                                ) : (
+                                  <Copy className="w-3 h-3 text-muted-foreground" />
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
+
                     {isLoading && (
-                      <div className="flex justify-start">
-                        <div className="bg-muted rounded-xl px-4 py-3 rounded-bl-none border border-primary/20 shadow-md">
+                      <div className="flex justify-start animate-fadeIn">
+                        <div className="bg-muted/80 rounded-xl px-4 py-3 rounded-bl-none border border-primary/30">
                           <div className="flex gap-2">
                             <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce" />
                             <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
@@ -277,36 +367,45 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
                 </ScrollArea>
 
                 {/* Input - Enhanced */}
-                <div className="p-4 border-t border-primary/10 flex gap-2 shrink-0 bg-background/80 backdrop-blur-sm">
-                  <Input
-                    placeholder="Ask about Zorvyn, Goals, Budget..."
-                    value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' && !isLoading && inputValue.trim()) {
-                        handleSendMessage()
-                      }
-                    }}
-                    disabled={false}
-                    className="text-sm border-primary/30 focus:border-primary focus:ring-primary/50 rounded-lg"
-                  />
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      if (!isLoading && inputValue.trim()) {
+                <div className="p-3 border-t border-primary/10 space-y-2 shrink-0 bg-background/80 backdrop-blur-sm">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Ask me anything..."
+                      value={inputValue}
+                      onChange={e => setInputValue(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !isLoading && inputValue.trim()) {
+                          handleSendMessage()
+                        }
+                      }}
+                      disabled={isLoading || isListening}
+                      className="text-sm border-primary/30 focus:border-primary focus:ring-primary/50 rounded-lg"
+                    />
+                    <Button
+                      size="icon"
+                      onClick={handleVoiceInput}
+                      disabled={isLoading}
+                      title="Voice input"
+                      className={`shrink-0 transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-gradient-to-r from-primary to-secondary'}`}
+                    >
+                      <Mic className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      onClick={() => {
                         handleSendMessage()
                         playSound('send')
-                      }
-                    }}
-                    disabled={isLoading || !inputValue.trim()}
-                    className="shrink-0 bg-linear-to-r from-primary to-secondary hover:scale-105 transition-transform"
-                  >
-                    {isLoading ? (
-                      <div className="w-4 h-4 border-2 border-primary/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                  </Button>
+                      }}
+                      disabled={isLoading || !inputValue.trim()}
+                      className="shrink-0 bg-gradient-to-r from-primary to-secondary hover:scale-105 transition-transform"
+                    >
+                      {isLoading ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </>
             )}
