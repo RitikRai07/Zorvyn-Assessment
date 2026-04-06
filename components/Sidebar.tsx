@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useFinance } from '@/lib/hooks/useFinance'
-import { BarChart3, LayoutDashboard, TrendingUp, Crown, Eye, LogOut, Settings, Share2 } from 'lucide-react'
+import { BarChart3, LayoutDashboard, TrendingUp, Crown, Eye, LogOut, Settings, Share2, Target } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import { SidebarSharePanel } from './SidebarSharePanel'
@@ -35,6 +35,12 @@ const navItems = [
     href: '/insights',
     icon: TrendingUp,
     description: 'Analytics & trends',
+  },
+  {
+    label: 'Goals',
+    href: '/goals',
+    icon: Target,
+    description: 'Financial targets',
   },
 ]
 
@@ -160,7 +166,7 @@ export function Sidebar() {
                   👑
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">Harshita</p>
+                  <p className="font-semibold text-sm">Ritik</p>
                   <p className="text-xs text-muted-foreground">Administrator • Full Access</p>
                 </div>
                 {role === 'admin' && (
