@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Transaction } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,10 +19,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { notifyTransactionAdded } from '@/lib/utils/notifications'
-import { playFinancialSound } from '@/lib/utils/financial-sounds'
 import { Card } from '@/components/ui/card'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 
 interface TransactionFormProps {
   open: boolean
@@ -60,54 +58,76 @@ export function TransactionForm({
   )
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setErrors({})
+      setSuccessMessage('')
+      setIsSubmitting(false)
+    }
+  }, [open])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.description.trim()) {
+    if (!formData.description || !formData.description.trim()) {
       newErrors.description = 'Description is required'
     }
-    if (formData.amount <= 0) {
+    
+    if (!formData.amount || formData.amount <= 0) {
       newErrors.amount = 'Amount must be greater than 0'
     }
+    
     if (!formData.category) {
       newErrors.category = 'Category is required'
+    }
+    
+    if (!formData.date) {
+      newErrors.date = 'Date is required'
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      // Play appropriate sound when transaction is added/updated
-      if (!initialData) {
-        // Adding new transaction - play contextual sound
-        if (formData.type === 'income') {
-          playFinancialSound('profit')  // Happy sound for income
-        } else {
-          // Determine if it's a significant expense
-          const expenseAmount = formData.amount
-          if (expenseAmount > 5000) {
-            playFinancialSound('loss')  // Warning sound for large expenses
-          } else {
-            playFinancialSound('transaction')  // Normal sound for regular expenses
-          }
-        }
-        
-        // Also play the legacy notification sound for compatibility
-        notifyTransactionAdded(formData.type)
-      }
-      
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setSuccessMessage('')
+
+    try {
+      // Simulate slight delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 300))
+
       onSubmit(formData)
-      setFormData({
-        date: new Date(),
-        description: '',
-        amount: 0,
-        category: 'Groceries',
-        type: 'expense',
+      
+      setSuccessMessage(initialData ? 'Transaction updated successfully!' : 'Transaction added successfully!')
+      
+      // Reset form after success
+      setTimeout(() => {
+        setFormData({
+          date: new Date(),
+          description: '',
+          amount: 0,
+          category: 'Groceries',
+          type: 'expense',
+        })
+        setErrors({})
+        setSuccessMessage('')
+        onOpenChange(false)
+      }, 500)
+    } catch (error) {
+      setErrors({
+        submit: error instanceof Error ? error.message : 'Failed to submit transaction',
       })
-      onOpenChange(false)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -127,10 +147,26 @@ export function TransactionForm({
           </DialogDescription>
         </DialogHeader>
 
+        {/* Success Message */}
+        {successMessage && (
+          <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <CheckCircle2 className="w-5 h-5 text-green-600" />
+            <p className="text-sm text-green-700 font-medium">{successMessage}</p>
+          </div>
+        )}
+
+        {/* Submit Error */}
+        {errors.submit && (
+          <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+            <AlertCircle className="w-5 h-5 text-destructive" />
+            <p className="text-sm text-destructive font-medium">{errors.submit}</p>
+          </div>
+        )}
+
         <div className="space-y-6">
           {/* Type Selection - Enhanced */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Transaction Type</Label>
+            <Label className="text-sm font-semibold">💰 Transaction Type</Label>
             <div className="grid grid-cols-2 gap-3">
               {['income', 'expense'].map((type) => (
                 <Card
@@ -166,12 +202,27 @@ export function TransactionForm({
             <Input
               id="date"
               type="date"
-              value={formData.date.toISOString().split('T')[0]}
-              onChange={(e) =>
-                setFormData({ ...formData, date: new Date(e.target.value) })
-              }
-              className="border-2 focus:border-primary transition-colors"
+              required
+              value={formData.date instanceof Date ? formData.date.toISOString().split('T')[0] : ''}
+              onChange={(e) => {
+                const newDate = new Date(e.target.value)
+                setFormData({ ...formData, date: newDate })
+                if (errors.date) {
+                  const newErrors = { ...errors }
+                  delete newErrors.date
+                  setErrors(newErrors)
+                }
+              }}
+              className={`border-2 focus:border-primary transition-colors ${
+                errors.date ? 'border-destructive' : ''
+              }`}
             />
+            {errors.date && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.date}
+              </p>
+            )}
           </div>
 
           {/* Description */}
@@ -179,11 +230,18 @@ export function TransactionForm({
             <Label htmlFor="description" className="text-sm font-semibold">📝 Description</Label>
             <Input
               id="description"
+              type="text"
+              required
               placeholder="e.g., Weekly grocery shopping"
               value={formData.description}
-              onChange={(e) =>
+              onChange={(e) => {
                 setFormData({ ...formData, description: e.target.value })
-              }
+                if (errors.description) {
+                  const newErrors = { ...errors }
+                  delete newErrors.description
+                  setErrors(newErrors)
+                }
+              }}
               className={`border-2 focus:border-primary transition-colors ${
                 errors.description ? 'border-destructive' : ''
               }`}
@@ -198,7 +256,7 @@ export function TransactionForm({
 
           {/* Amount */}
           <div className="space-y-2">
-            <Label htmlFor="amount" className="text-sm font-semibold">💰 Amount</Label>
+            <Label htmlFor="amount" className="text-sm font-semibold">� Amount</Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lg font-bold text-muted-foreground">
                 ₹
@@ -206,16 +264,20 @@ export function TransactionForm({
               <Input
                 id="amount"
                 type="number"
-                min="0"
+                required
+                min="0.01"
                 step="0.01"
                 placeholder="0.00"
                 value={formData.amount || ''}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    amount: parseFloat(e.target.value) || 0,
-                  })
-                }
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value) || 0
+                  setFormData({ ...formData, amount: value })
+                  if (errors.amount) {
+                    const newErrors = { ...errors }
+                    delete newErrors.amount
+                    setErrors(newErrors)
+                  }
+                }}
                 className={`border-2 pl-8 focus:border-primary transition-colors ${
                   errors.amount ? 'border-destructive' : ''
                 }`}
@@ -234,14 +296,21 @@ export function TransactionForm({
             <Label htmlFor="category" className="text-sm font-semibold">🏷️ Category</Label>
             <Select
               value={formData.category}
-              onValueChange={(value) =>
+              onValueChange={(value) => {
                 setFormData({ ...formData, category: value })
-              }
+                if (errors.category) {
+                  const newErrors = { ...errors }
+                  delete newErrors.category
+                  setErrors(newErrors)
+                }
+              }}
             >
-              <SelectTrigger id="category" className="border-2 focus:border-primary">
+              <SelectTrigger id="category" className={`border-2 focus:border-primary ${
+                errors.category ? 'border-destructive' : ''
+              }`}>
                 <div className="flex items-center gap-2">
-                  <span>{currentCategory?.emoji}</span>
-                  <SelectValue />
+                  <span>{currentCategory?.emoji || '📦'}</span>
+                  <SelectValue placeholder="Select category" />
                 </div>
               </SelectTrigger>
               <SelectContent>
@@ -270,18 +339,29 @@ export function TransactionForm({
             variant="outline"
             onClick={() => onOpenChange(false)}
             className="px-6"
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSubmit}
+            disabled={isSubmitting}
             className={`px-6 ${
               formData.type === 'income' 
                 ? 'bg-green-600 hover:bg-green-700' 
                 : 'bg-primary hover:bg-primary/90'
             }`}
           >
-            {initialData ? '✏️ Update' : '➕ Add'} Transaction
+            {isSubmitting ? (
+              <>
+                <span className="animate-spin mr-2">⏳</span>
+                {initialData ? 'Updating...' : 'Adding...'}
+              </>
+            ) : (
+              <>
+                {initialData ? '✏️ Update' : '➕ Add'} Transaction
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>
