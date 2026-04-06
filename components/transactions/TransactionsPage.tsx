@@ -90,17 +90,24 @@ export function TransactionsPage() {
               View and manage your financial transactions
             </p>
           </div>
-          <Button
-            onClick={() => {
-              setEditingTransaction(null)
-              setFormOpen(true)
-            }}
-            className="gap-2 w-full sm:w-auto"
-            size="lg"
-          >
-            <Plus className="w-4 h-4" />
-            Add Transaction
-          </Button>
+          {role !== 'viewer' && (
+            <Button
+              onClick={() => {
+                setEditingTransaction(null)
+                setFormOpen(true)
+              }}
+              className="gap-2 w-full sm:w-auto"
+              size="lg"
+            >
+              <Plus className="w-4 h-4" />
+              Add Transaction
+            </Button>
+          )}
+          {role === 'viewer' && (
+            <div className="px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">👁️ Viewer Mode - Read Only</p>
+            </div>
+          )}
         </div>
 
         {/* Quick Stats */}
@@ -148,21 +155,25 @@ export function TransactionsPage() {
         role={role}
         onEdit={handleEditClick}
         onDelete={deleteTransaction}
+        isViewerMode={role === 'viewer'}
       />
 
       {/* Transaction Form Dialog */}
-      <TransactionForm
-        open={formOpen}
-        onOpenChange={handleFormOpenChange}
-        onSubmit={handleFormSubmit}
-        initialData={editingTransaction ? {
-          date: editingTransaction.date,
-          description: editingTransaction.description,
-          amount: editingTransaction.amount,
-          category: editingTransaction.category,
-          type: editingTransaction.type,
-        } : undefined}
-      />
+      {role !== 'viewer' && (
+        <TransactionForm
+          open={formOpen}
+          onOpenChange={handleFormOpenChange}
+          onSubmit={handleFormSubmit}
+          userRole={role}
+          initialData={editingTransaction ? {
+            date: editingTransaction.date,
+            description: editingTransaction.description,
+            amount: editingTransaction.amount,
+            category: editingTransaction.category,
+            type: editingTransaction.type,
+          } : undefined}
+        />
+      )}
     </div>
   )
 }

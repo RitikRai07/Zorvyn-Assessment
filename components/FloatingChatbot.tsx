@@ -172,7 +172,7 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
       }
       setMessages(prev => [...prev, newBotMessage])
       setIsLoading(false)
-    }, 500)
+    }, 300)
 
     // Cleanup timer on unmount
     return () => clearTimeout(timer)
@@ -187,7 +187,7 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
             setIsOpen(true)
             playSound('open')
           }}
-          className="fixed bottom-6 right-6 z-40 w-16 h-16 rounded-full bg-linear-to-br from-primary via-secondary to-primary shadow-2xl hover:shadow-2xl transition-all duration-300 hover:scale-125 flex items-center justify-center text-white group animate-bounce hover:animate-pulse border-2 border-primary/50 hover:border-primary"
+          className="fixed bottom-6 right-6 z-40 w-16 h-16 rounded-full bg-gradient-to-br from-primary via-secondary to-primary shadow-2xl hover:shadow-2xl transition-all duration-300 hover:scale-125 flex items-center justify-center text-white group animate-bounce hover:animate-pulse border-2 border-primary/50 hover:border-primary"
           title="Open AI Finance Assistant"
         >
           <MessageCircle className="w-8 h-8 group-hover:scale-125 transition-transform" />
@@ -203,7 +203,7 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
         } w-96 animate-slideInRight`}>
           <Card className="w-full h-full flex flex-col shadow-2xl border-2 border-primary/30 bg-gradient-to-b from-background from-0% to-background/95 to-100%">
             {/* Header - Enhanced */}
-            <CardHeader className="bg-linear-to-r from-primary via-secondary to-primary text-white shrink-0 rounded-t-lg shadow-lg border-b-2 border-primary/50">
+            <CardHeader className="bg-gradient-to-r from-primary via-secondary to-primary text-white shrink-0 rounded-t-lg shadow-lg border-b-2 border-primary/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
@@ -253,7 +253,7 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
                         <div
                           className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed font-medium ${
                             message.type === 'user'
-                              ? 'bg-linear-to-r from-primary to-secondary text-white rounded-br-none shadow-lg'
+                              ? 'bg-gradient-to-r from-primary to-secondary text-white rounded-br-none shadow-lg'
                               : 'bg-muted text-foreground rounded-bl-none border border-primary/20 shadow-md'
                           } whitespace-pre-wrap backdrop-blur-sm`}
                         >

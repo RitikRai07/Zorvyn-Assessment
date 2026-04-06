@@ -27,6 +27,7 @@ interface TransactionFormProps {
   onOpenChange: (open: boolean) => void
   onSubmit: (transaction: Omit<Transaction, 'id'>) => void
   initialData?: Omit<Transaction, 'id'>
+  userRole?: 'admin' | 'viewer'
 }
 
 const categories = [
@@ -46,6 +47,7 @@ export function TransactionForm({
   onOpenChange,
   onSubmit,
   initialData,
+  userRole = 'viewer',
 }: TransactionFormProps) {
   const [formData, setFormData] = useState<Omit<Transaction, 'id'>>(
     initialData || {
@@ -60,6 +62,35 @@ export function TransactionForm({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+
+  const playTransactionSound = (type: 'income' | 'expense') => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+      
+      if (type === 'income') {
+        // Happy sound for income - ascending tones
+        oscillator.frequency.setValueAtTime(500, audioContext.currentTime)
+        oscillator.frequency.linearRampToValueAtTime(800, audioContext.currentTime + 0.3)
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 0.5)
+      } else {
+        // Alert sound for expense - descending tone
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
+        oscillator.frequency.linearRampToValueAtTime(400, audioContext.currentTime + 0.4)
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 0.5)
+      }
+    } catch (e) {
+      // Audio context not available
+    }
+  }
 
   // Reset form when dialog closes
   useEffect(() => {
@@ -107,6 +138,9 @@ export function TransactionForm({
 
       onSubmit(formData)
       
+      // Play sound based on transaction type
+      playTransactionSound(formData.type)
+      
       setSuccessMessage(initialData ? 'Transaction updated successfully!' : 'Transaction added successfully!')
       
       // Reset form after success
@@ -135,7 +169,7 @@ export function TransactionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="animate-slideInRight max-w-2xl">
+      <DialogContent className="animate-slideInRight max-w-2xl" onClick={(e) => userRole === 'viewer' && e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-2xl">
             {initialData ? '✏️ Edit Transaction' : '➕ Add New Transaction'}

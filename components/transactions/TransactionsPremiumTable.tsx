@@ -13,6 +13,7 @@ interface TransactionsPremiumTableProps {
   role: UserRole
   onEdit: (transaction: Transaction) => void
   onDelete: (id: string) => void
+  isViewerMode?: boolean
 }
 
 const categoryEmojis: Record<string, string> = {
@@ -44,6 +45,7 @@ export function TransactionsPremiumTable({
   role,
   onEdit,
   onDelete,
+  isViewerMode = false,
 }: TransactionsPremiumTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date')
