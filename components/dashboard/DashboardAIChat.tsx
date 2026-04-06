@@ -87,7 +87,37 @@ export function DashboardAIChat({ transactions, accountBalance }: DashboardAICha
 
     if (message.includes('advice') || message.includes('suggest') || message.includes('recommend')) {
       const savingsRateNum = totalIncome > 0 ? parseFloat(((savings / totalIncome) * 100).toFixed(1)) : 0
-      return `💡 **Financial Recommendations**\n\n1. **Track Spending**: Monitor your ${topCategory?.category || 'expenses'} closely\n2. **Set Budget**: Allocate 20-30% of income to savings\n3. **Review Monthly**: Analyze spending patterns regularly\n4. **Reduce Waste**: Look for non-essential expenses to cut\n5. **Build Emergency Fund**: Target 3-6 months of expenses\n\nYour current financial health: **${savingsRateNum > 20 ? '💪 Strong' : savingsRateNum > 10 ? '📊 Good' : '📈 Improving'}**`
+      const expensePercentNum = totalIncome > 0 ? parseFloat(((totalExpense / totalIncome) * 100).toFixed(1)) : 0
+      
+      let recommendations = `💡 **Personalized Financial Recommendations**\n\n`
+      
+      // Based on spending patterns
+      if (expensePercentNum > 80) {
+        recommendations += `⚠️ **Urgent**: Your expenses are **${expensePercentNum.toFixed(1)}%** of income!\n`
+        recommendations += `• Cut non-essential spending in ${topCategory?.category || 'major categories'}\n`
+        recommendations += `• Review subscriptions and memberships\n`
+        recommendations += `• Set strict budget limits\n\n`
+      }
+      
+      if (savingsRateNum < 5) {
+        recommendations += `📈 **Increase Savings**:\n`
+        recommendations += `• Aim for 10-20% savings rate (${formatCurrency(totalIncome * 0.1)} - ${formatCurrency(totalIncome * 0.2)})\n`
+        recommendations += `• Automate transfers to savings\n`
+        recommendations += `• Build 3-month emergency fund\n\n`
+      } else if (savingsRateNum >= 20) {
+        recommendations += `🎉 **Excellent Work!** You're saving **${savingsRateNum.toFixed(1)}%** - Keep it up!\n`
+        recommendations += `• Invest surplus funds for growth\n`
+        recommendations += `• Build long-term wealth\n\n`
+      }
+      
+      if (topCategory && topCategory.amount > totalExpense * 0.3) {
+        recommendations += `🔍 **Optimize ${topCategory.category}**:\n`
+        recommendations += `• This category is **${((topCategory.amount / totalExpense) * 100).toFixed(1)}%** of total spending\n`
+        recommendations += `• Look for ways to reduce this expense\n`
+        recommendations += `• Set monthly limit\n`
+      }
+      
+      return recommendations
     }
 
     if (message.includes('how') || message.includes('help') || message.includes('?')) {

@@ -4,6 +4,7 @@ import { useFinance } from '@/lib/hooks/useFinance'
 import { SmartInsights } from './SmartInsights'
 import { MonthlyComparison } from './MonthlyComparison'
 import { HighestSpendingCategory } from './HighestSpendingCategory'
+import { BudgetPlanner } from '@/components/dashboard/BudgetPlanner'
 import { BarChart3, Brain, Calendar } from 'lucide-react'
 
 export function InsightsPage() {
@@ -36,6 +37,11 @@ export function InsightsPage() {
           <div className="lg:col-span-2">
             <SmartInsights transactions={transactions} />
           </div>
+        </div>
+
+        {/* Budget Planning Section */}
+        <div>
+          <BudgetPlanner transactions={transactions} />
         </div>
 
         {/* Bottom Section: Monthly Comparison */}

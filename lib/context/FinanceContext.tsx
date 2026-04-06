@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useCallback, useEffect, useState } from 'react'
-import { Transaction, Account, Filters, UserRole, FinanceContextType } from '../types'
+import { Transaction, Account, Filters, UserRole, FinanceContextType, UserProfile } from '../types'
 import { generateMockTransactions, generateMockAccounts } from '../utils/mockData'
 
 const defaultFilters: Filters = {
@@ -12,6 +12,19 @@ const defaultFilters: Filters = {
   searchText: ''
 }
 
+const defaultUserProfile: Record<UserRole, UserProfile> = {
+  admin: {
+    name: 'Harshita',
+    role: 'admin',
+    avatar: '👑',
+  },
+  viewer: {
+    name: 'Viewer',
+    role: 'viewer',
+    avatar: '👁️',
+  },
+}
+
 export const FinanceContext = createContext<FinanceContextType | undefined>(undefined)
 
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
@@ -19,6 +32,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>(() => generateMockTransactions())
   const [accounts, setAccounts] = useState<Account[]>(() => generateMockAccounts())
   const [role, setRole] = useState<UserRole>('viewer')
+  const [userProfile, setUserProfile] = useState<UserProfile>(defaultUserProfile['viewer'])
   const [filters, setFilters] = useState<Filters>(defaultFilters)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false)
   const [isHydrated, setIsHydrated] = useState(false)
@@ -40,6 +54,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
     const savedRole = localStorage.getItem('finance_role') as UserRole | null
     if (savedRole) {
+      setUserProfile(defaultUserProfile[savedRole])
       setRole(savedRole)
     }
 
@@ -108,6 +123,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const handleSetRole = useCallback((newRole: UserRole) => {
+    setUserProfile(defaultUserProfile[newRole])
     setRole(newRole)
   }, [])
 
@@ -125,6 +141,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
   const value: FinanceContextType = {
     transactions,
+    userProfile,
     accounts,
     role,
     filters,

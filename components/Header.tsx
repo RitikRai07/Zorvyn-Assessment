@@ -25,16 +25,16 @@ export function Header() {
   }
 
   return (
-    <header className="border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3.5">
-        {/* Logo & Branding */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary to-secondary flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
-            <span className="text-primary-foreground font-bold text-lg">₹</span>
+    <header className="border-b border-border/50 bg-gradient-to-r from-background/95 to-background/90 backdrop-blur-2xl sticky top-0 z-50 shadow-sm hover:shadow-md transition-shadow">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
+        {/* Branding - Zorvyn Finance */}
+        <div className="flex items-center gap-3 group hover:scale-105 transition-transform duration-300">
+          <div className="relative px-4 py-2 rounded-2xl bg-gradient-to-br from-teal-600/30 to-cyan-500/20 border-2 border-teal-500/50 group-hover:from-teal-600/50 group-hover:to-cyan-500/35 group-hover:border-teal-500/70 transition-all duration-300 shadow-2xl">
+            <h1 className="text-3xl font-black bg-gradient-to-r from-teal-400 via-cyan-300 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">⚡</h1>
           </div>
-          <div className="hidden sm:block">
-            <h1 className="text-lg font-semibold tracking-tight text-foreground">Zorvyn</h1>
-            <p className="text-xs text-muted-foreground">Finance Dashboard</p>
+          <div>
+            <h1 className="text-2xl font-black bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity drop-shadow-lg">Zorvyn Finance</h1>
+            <p className="text-xs text-muted-foreground/80 font-bold tracking-widest">💳 Professional Finance Manager</p>
           </div>
         </div>
 
@@ -44,29 +44,29 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
-                className="gap-1.5 sm:gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                className="gap-1.5 sm:gap-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-green-700 dark:text-green-300 border-green-500/40 hover:border-green-500/60 font-bold shadow-sm hover:shadow-md transition-all"
                 title="Export your transactions"
               >
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline text-xs sm:text-sm">Export</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Export transactions</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="font-bold">📊 Export Data</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={() => handleExport('csv')}
-                className="cursor-pointer flex items-center gap-2"
+                className="cursor-pointer flex items-center gap-2 py-2 px-3"
               >
-                <span>📊</span> CSV Format
+                <span>📋</span> <span>CSV Format (Excel)</span>
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleExport('json')}
-                className="cursor-pointer flex items-center gap-2"
+                className="cursor-pointer flex items-center gap-2 py-2 px-3"
               >
-                <span>📋</span> JSON Format
+                <span>🔗</span> <span>JSON Format</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -79,12 +79,12 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="gap-1.5 sm:gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                className="gap-1.5 sm:gap-2 text-muted-foreground hover:text-foreground hover:bg-blue-500/10 rounded-xl font-bold transition-all"
                 title="Switch user role"
               >
                 <Settings className="w-4 h-4" />
                 <span className="hidden sm:inline text-xs sm:text-sm capitalize font-medium">
-                  {role === 'admin' ? '👑 Admin' : '👁️ Viewer'}
+                  {role === 'admin' ? '👑 Ritik' : '👁️ Viewer'}
                 </span>
               </Button>
             </DropdownMenuTrigger>
@@ -108,7 +108,7 @@ export function Header() {
               >
                 <span className="text-lg">👑</span>
                 <div className="flex-1">
-                  <div className="font-medium text-sm">Admin</div>
+                  <div className="font-medium text-sm">Ritik (Admin)</div>
                   <div className="text-xs text-muted-foreground">Full access</div>
                 </div>
                 {role === 'admin' && <span className="text-lg">✓</span>}
@@ -118,10 +118,10 @@ export function Header() {
 
           {/* Dark Mode Toggle */}
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={toggleDarkMode}
-            className="gap-1.5 sm:gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="gap-1.5 sm:gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-700 dark:text-amber-300 border-amber-500/40 hover:border-amber-500/60 font-bold shadow-sm hover:shadow-md transition-all"
             title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {isDarkMode ? (

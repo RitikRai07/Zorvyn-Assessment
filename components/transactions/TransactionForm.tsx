@@ -21,6 +21,8 @@ import {
 import { Label } from '@/components/ui/label'
 import { notifyTransactionAdded } from '@/lib/utils/notifications'
 import { playFinancialSound } from '@/lib/utils/financial-sounds'
+import { Card } from '@/components/ui/card'
+import { AlertCircle } from 'lucide-react'
 
 interface TransactionFormProps {
   open: boolean
@@ -30,15 +32,15 @@ interface TransactionFormProps {
 }
 
 const categories = [
-  'Groceries',
-  'Transport',
-  'Entertainment',
-  'Utilities',
-  'Dining',
-  'Healthcare',
-  'Shopping',
-  'Salary',
-  'Investments',
+  { name: 'Groceries', emoji: '🛒', color: 'from-green-400 to-green-600' },
+  { name: 'Transport', emoji: '🚗', color: 'from-blue-400 to-blue-600' },
+  { name: 'Entertainment', emoji: '🎬', color: 'from-purple-400 to-purple-600' },
+  { name: 'Utilities', emoji: '💡', color: 'from-yellow-400 to-yellow-600' },
+  { name: 'Dining', emoji: '🍽️', color: 'from-orange-400 to-orange-600' },
+  { name: 'Healthcare', emoji: '🏥', color: 'from-red-400 to-red-600' },
+  { name: 'Shopping', emoji: '🛍️', color: 'from-pink-400 to-pink-600' },
+  { name: 'Salary', emoji: '💰', color: 'from-emerald-400 to-emerald-600' },
+  { name: 'Investments', emoji: '📈', color: 'from-cyan-400 to-cyan-600' },
 ]
 
 export function TransactionForm({
@@ -109,22 +111,58 @@ export function TransactionForm({
     }
   }
 
+  const currentCategory = categories.find(c => c.name === formData.category)
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="animate-slideInRight">
+      <DialogContent className="animate-slideInRight max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {initialData ? 'Edit Transaction' : 'Add New Transaction'}
+          <DialogTitle className="text-2xl">
+            {initialData ? '✏️ Edit Transaction' : '➕ Add New Transaction'}
           </DialogTitle>
           <DialogDescription>
-            Enter the transaction details below
+            {initialData 
+              ? 'Update the transaction details below' 
+              : 'Create a new transaction to track your finances'}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Type Selection - Enhanced */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold">Transaction Type</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {['income', 'expense'].map((type) => (
+                <Card
+                  key={type}
+                  onClick={() => setFormData({ ...formData, type: type as 'income' | 'expense' })}
+                  className={`p-4 cursor-pointer transition-all border-2 ${
+                    formData.type === type
+                      ? type === 'income'
+                        ? 'border-green-500 bg-green-50/50'
+                        : 'border-red-500 bg-red-50/50'
+                      : 'border-border hover:border-muted-foreground/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">
+                      {type === 'income' ? '💵' : '💸'}
+                    </span>
+                    <div>
+                      <div className="font-semibold capitalize">{type}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {type === 'income' ? 'Money coming in' : 'Money going out'}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
           {/* Date */}
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date" className="text-sm font-semibold">📅 Date</Label>
             <Input
               id="date"
               type="date"
@@ -132,103 +170,118 @@ export function TransactionForm({
               onChange={(e) =>
                 setFormData({ ...formData, date: new Date(e.target.value) })
               }
+              className="border-2 focus:border-primary transition-colors"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-sm font-semibold">📝 Description</Label>
             <Input
               id="description"
-              placeholder="e.g., Grocery shopping"
+              placeholder="e.g., Weekly grocery shopping"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className={errors.description ? 'border-destructive' : ''}
+              className={`border-2 focus:border-primary transition-colors ${
+                errors.description ? 'border-destructive' : ''
+              }`}
             />
             {errors.description && (
-              <p className="text-xs text-destructive">{errors.description}</p>
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.description}
+              </p>
             )}
           </div>
 
           {/* Amount */}
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
-            <Input
-              id="amount"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              value={formData.amount || ''}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  amount: parseFloat(e.target.value) || 0,
-                })
-              }
-              className={errors.amount ? 'border-destructive' : ''}
-            />
+            <Label htmlFor="amount" className="text-sm font-semibold">💰 Amount</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lg font-bold text-muted-foreground">
+                ₹
+              </span>
+              <Input
+                id="amount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={formData.amount || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    amount: parseFloat(e.target.value) || 0,
+                  })
+                }
+                className={`border-2 pl-8 focus:border-primary transition-colors ${
+                  errors.amount ? 'border-destructive' : ''
+                }`}
+              />
+            </div>
             {errors.amount && (
-              <p className="text-xs text-destructive">{errors.amount}</p>
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.amount}
+              </p>
             )}
           </div>
 
-          {/* Type */}
-          <div className="space-y-2">
-            <Label htmlFor="type">Type</Label>
-            <Select
-              value={formData.type}
-              onValueChange={(value: 'income' | 'expense') =>
-                setFormData({ ...formData, type: value })
-              }
-            >
-              <SelectTrigger id="type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="income">Income</SelectItem>
-                <SelectItem value="expense">Expense</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Category */}
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+          <div className="space-y-3">
+            <Label htmlFor="category" className="text-sm font-semibold">🏷️ Category</Label>
             <Select
               value={formData.category}
               onValueChange={(value) =>
                 setFormData({ ...formData, category: value })
               }
             >
-              <SelectTrigger id="category">
-                <SelectValue />
+              <SelectTrigger id="category" className="border-2 focus:border-primary">
+                <div className="flex items-center gap-2">
+                  <span>{currentCategory?.emoji}</span>
+                  <SelectValue />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                  <SelectItem key={cat.name} value={cat.name}>
+                    <div className="flex items-center gap-2">
+                      <span>{cat.emoji}</span>
+                      {cat.name}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {errors.category && (
-              <p className="text-xs text-destructive">{errors.category}</p>
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.category}
+              </p>
             )}
           </div>
         </div>
 
-        <div className="flex gap-2 justify-end">
+        {/* Action Buttons */}
+        <div className="flex gap-3 justify-end pt-6 border-t border-border/50">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
+            className="px-6"
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
-            {initialData ? 'Update' : 'Add'} Transaction
+          <Button 
+            onClick={handleSubmit}
+            className={`px-6 ${
+              formData.type === 'income' 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : 'bg-primary hover:bg-primary/90'
+            }`}
+          >
+            {initialData ? '✏️ Update' : '➕ Add'} Transaction
           </Button>
         </div>
       </DialogContent>

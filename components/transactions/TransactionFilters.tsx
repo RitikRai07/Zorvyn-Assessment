@@ -19,15 +19,15 @@ interface TransactionFiltersProps {
 }
 
 const categories = [
-  'Groceries',
-  'Transport',
-  'Entertainment',
-  'Utilities',
-  'Dining',
-  'Healthcare',
-  'Shopping',
-  'Salary',
-  'Investments',
+  { name: 'Groceries', emoji: '🛒' },
+  { name: 'Transport', emoji: '🚗' },
+  { name: 'Entertainment', emoji: '🎬' },
+  { name: 'Utilities', emoji: '💡' },
+  { name: 'Dining', emoji: '🍽️' },
+  { name: 'Healthcare', emoji: '🏥' },
+  { name: 'Shopping', emoji: '🛍️' },
+  { name: 'Salary', emoji: '💰' },
+  { name: 'Investments', emoji: '📈' },
 ]
 
 export function TransactionFilters({ transactions }: TransactionFiltersProps) {
@@ -85,8 +85,8 @@ export function TransactionFilters({ transactions }: TransactionFiltersProps) {
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                  <SelectItem key={cat.name} value={cat.name}>
+                    {cat.emoji} {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>

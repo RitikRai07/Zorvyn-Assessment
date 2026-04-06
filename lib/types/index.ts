@@ -1,5 +1,11 @@
 export type UserRole = 'viewer' | 'admin'
 
+export interface UserProfile {
+  name: string
+  role: UserRole
+  avatar: string
+}
+
 export interface Transaction {
   id: string
   date: Date
@@ -27,6 +33,7 @@ export interface FinanceContextType {
   transactions: Transaction[]
   accounts: Account[]
   role: UserRole
+  userProfile: UserProfile
   filters: Filters
   isDarkMode: boolean
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void

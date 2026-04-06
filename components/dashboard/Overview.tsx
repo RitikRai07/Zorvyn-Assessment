@@ -4,13 +4,20 @@ import { useFinance } from '@/lib/hooks/useFinance'
 import { SummaryCards } from './SummaryCards'
 import { BalanceTrendChart } from './BalanceTrendChart'
 import { SpendingBreakdownChart } from './SpendingBreakdownChart'
-import { TimeDisplay } from './TimeDisplay'
 import { DashboardAIChat } from './DashboardAIChat'
 import { TipSection } from '@/components/TipSection'
+import { QuickStats } from './QuickStats'
+import { SpendingAnalytics } from './SpendingAnalytics'
+import { TimeGreeting } from './TimeGreeting'
+import { AdminActiveTime } from './AdminActiveTime'
+import { BudgetPlanner } from './BudgetPlanner'
+import { BillingReports } from './BillingReports'
+import { AdminSharePanel } from '@/components/AdminSharePanel'
 import { calculateTotalBalance } from '@/lib/utils/mockData'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export function DashboardOverview() {
-  const { transactions, accounts, setFilters } = useFinance()
+  const { transactions, accounts, setFilters, role } = useFinance()
   const totalBalance = calculateTotalBalance(accounts)
 
   const handleCategoryClick = (category: string) => {
@@ -20,6 +27,11 @@ export function DashboardOverview() {
 
   return (
     <div className="space-y-8 animate-fadeIn">
+      {/* Time Greeting Section */}
+      <div>
+        <TimeGreeting />
+      </div>
+
       {/* Hero Header Section */}
       <div className="space-y-3 relative">
         <div className="absolute inset-0 bg-linear-to-r from-primary/10 via-transparent to-secondary/10 rounded-2xl blur-3xl opacity-30 -z-10" />
@@ -28,17 +40,34 @@ export function DashboardOverview() {
           Dashboard
         </h1>
         <p className="text-base sm:text-lg text-muted-foreground font-medium">
-          Welcome back! Here&apos;s your financial snapshot
+          Welcome back! Here&apos;s your financial snapshot and insights
         </p>
       </div>
 
-      {/* Time Display with Enhanced Styling */}
-      <TimeDisplay />
+      {/* Tabs for Dashboard/Reports */}
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="dashboard">📊 Dashboard</TabsTrigger>
+          <TabsTrigger value="billing">📄 Billing & Reports</TabsTrigger>
+        </TabsList>
 
-      {/* Summary Cards with Better Spacing */}
-      <div>
-        <SummaryCards transactions={transactions} accountBalance={totalBalance} />
-      </div>
+        <TabsContent value="dashboard" className="space-y-8 mt-8">
+
+        {/* Admin Activity Tracking - Only for Admin */}
+        <AdminActiveTime />
+
+        {/* Admin Share Link Panel - Only for Admin */}
+        {role === 'admin' && <AdminSharePanel />}
+
+        {/* Summary Cards with Better Spacing */}
+        <div>
+          <SummaryCards transactions={transactions} accountBalance={totalBalance} />
+        </div>
+
+        {/* Quick Stats - This Month Breakdown */}
+        <div>
+          <QuickStats transactions={transactions} />
+        </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -56,8 +85,19 @@ export function DashboardOverview() {
       {/* Tips Section with Expandable Cards */}
       <TipSection />
 
+      {/* Spending Analytics */}
+      <div>
+        <SpendingAnalytics transactions={transactions} />
+      </div>
+
       {/* AI Chat Widget */}
       <DashboardAIChat transactions={transactions} accountBalance={totalBalance} />
+        </TabsContent>
+
+        <TabsContent value="billing" className="mt-8">
+          <BillingReports transactions={transactions} />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

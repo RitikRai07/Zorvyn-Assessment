@@ -2,8 +2,19 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart3, LayoutDashboard, TrendingUp } from 'lucide-react'
+import { useFinance } from '@/lib/hooks/useFinance'
+import { BarChart3, LayoutDashboard, TrendingUp, Crown, Eye, LogOut, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const navItems = [
   {
@@ -28,10 +39,44 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { role, setRole } = useFinance()
+  const [showProfile, setShowProfile] = useState(false)
+
+  const userName = role === 'admin' ? 'Ritik' : 'Viewer User'
+  const userEmoji = role === 'admin' ? '👑' : '👁️'
+  const userRole = role === 'admin' ? 'Administrator' : 'Viewer'
+
+  const handleRoleSwitch = (newRole: 'admin' | 'viewer') => {
+    setRole(newRole)
+    setShowProfile(false)
+  }
 
   return (
-    <aside className="w-56 border-r border-border/50 bg-background/50 backdrop-blur-sm min-h-screen flex flex-col sticky top-0">
-      <nav className="p-3 space-y-1 flex-1">
+    <aside className="w-56 border-r border-border/40 bg-gradient-to-b from-background/80 to-background/60 backdrop-blur-2xl min-h-screen flex flex-col sticky top-0 shadow-xl hover:shadow-2xl transition-shadow">
+      {/* Premium Profile Card */}
+      <div className="p-4">
+        <button
+          onClick={() => setShowProfile(true)}
+          className="w-full p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/10 border-2 border-primary/30 hover:from-primary/35 hover:to-secondary/20 hover:border-primary/60 transition-all duration-300 hover:shadow-lg group text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-white group-hover:scale-110 transition-transform duration-300 shadow-lg ring-2 ring-primary/30 group-hover:ring-primary/60">
+              {userEmoji}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-black text-sm truncate text-foreground">
+                {userName}
+              </p>
+              <p className="text-xs text-muted-foreground/80 truncate font-semibold">
+                {userRole}
+              </p>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <nav className="p-4 space-y-2 flex-1">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
@@ -41,10 +86,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium group relative overflow-hidden',
+                'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 text-sm font-bold group relative overflow-hidden',
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'text-foreground hover:bg-muted/60 hover:text-foreground'
+                  ? 'bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground shadow-lg hover:shadow-xl'
+                  : 'text-foreground hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/5 hover:border hover:border-primary/20'
               )}
             >
               {/* Animated background */}
@@ -73,10 +118,74 @@ export function Sidebar() {
         <div className="p-3 bg-accent/10 rounded-lg text-accent-foreground border border-accent/20 hover:border-accent/40 transition-colors">
           <p className="font-semibold mb-2 text-xs uppercase tracking-wide text-muted-foreground">💡 Tip</p>
           <p className="text-xs leading-relaxed opacity-80">
-            Switch between Admin and Viewer roles using the dropdown in the header to see different UI features.
+            Click your profile to switch between Admin and Viewer roles.
           </p>
         </div>
       </div>
+
+      {/* Profile Modal */}
+      <AlertDialog open={showProfile} onOpenChange={setShowProfile}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl">Switch User Role</AlertDialogTitle>
+            <AlertDialogDescription>
+              Choose a role to continue as
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-3 py-4">
+            {/* Admin Option */}
+            <button
+              onClick={() => handleRoleSwitch('admin')}
+              className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                role === 'admin'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-purple-400 to-pink-500 flex items-center justify-center text-lg">
+                  👑
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Harshita</p>
+                  <p className="text-xs text-muted-foreground">Administrator • Full Access</p>
+                </div>
+                {role === 'admin' && (
+                  <div className="ml-auto text-primary text-lg">✓</div>
+                )}
+              </div>
+            </button>
+
+            {/* Viewer Option */}
+            <button
+              onClick={() => handleRoleSwitch('viewer')}
+              className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                role === 'viewer'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-400 to-cyan-500 flex items-center justify-center text-lg">
+                  👁️
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Viewer</p>
+                  <p className="text-xs text-muted-foreground">Read-only • Limited Access</p>
+                </div>
+                {role === 'viewer' && (
+                  <div className="ml-auto text-primary text-lg">✓</div>
+                )}
+              </div>
+            </button>
+          </div>
+
+          <AlertDialogCancel className="w-full">
+            Close
+          </AlertDialogCancel>
+        </AlertDialogContent>
+      </AlertDialog>
     </aside>
   )
 }

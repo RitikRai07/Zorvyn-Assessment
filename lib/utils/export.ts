@@ -7,19 +7,15 @@ export function exportToCSV(transactions: Transaction[]): void {
     return
   }
 
-  const headers = ['Date', 'Description', 'Category', 'Type', 'Amount (₹)']
+  let csvContent = ''
   
-  const rows = transactions
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .map(t => [
-      formatDate(t.date),
-      t.description,
-      t.category,
-      t.type.charAt(0).toUpperCase() + t.type.slice(1),
-      formatCurrency(t.amount)
-    ])
+  // Header with metadata
+  csvContent += '═══════════════════════════════════════════════════\n'
+  csvContent += 'ZORVYN - FINANCIAL TRANSACTIONS REPORT\n'
+  csvContent += `Generated: ${new Date().toLocaleString('en-IN')}\n`
+  csvContent += '═══════════════════════════════════════════════════\n\n'
 
-  // Add summary section
+  // Summary section
   const totalIncome = transactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0)
@@ -28,19 +24,72 @@ export function exportToCSV(transactions: Transaction[]): void {
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0)
 
-  const csv = [
-    headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
-    '', // Empty line for separation
-    'Summary,,,',
-    `Total Income,${formatCurrency(totalIncome)},`,
-    `Total Expenses,${formatCurrency(totalExpense)},`,
-    `Net Balance,${formatCurrency(totalIncome - totalExpense)},`,
-    '', // Empty line
-    `Export Date: ${new Date().toLocaleString('en-IN')}`
-  ].join('\n')
+  const netBalance = totalIncome - totalExpense
 
-  downloadFile(csv, `Zorvyn_Transactions_${getDayMonthYear()}.csv`, 'text/csv;charset=utf-8;')
+  csvContent += 'SUMMARY REPORT\n'
+  csvContent += '───────────────────────────────────────────────────\n'
+  csvContent += `Total Transactions,${transactions.length}\n`
+  csvContent += `Total Income,${formatCurrency(totalIncome)}\n`
+  csvContent += `Total Expenses,${formatCurrency(totalExpense)}\n`
+  csvContent += `Net Balance,${formatCurrency(netBalance)}\n`
+  csvContent += `Balance Status,${netBalance >= 0 ? '✓ Positive' : '⚠ Negative'}\n\n`
+
+  // Category breakdown
+  const categoryData: Record<string, { count: number; amount: number; type: string }> = {}
+  
+  transactions.forEach(t => {
+    if (!categoryData[t.category]) {
+      categoryData[t.category] = { count: 0, amount: 0, type: t.type }
+    }
+    categoryData[t.category].count += 1
+    categoryData[t.category].amount += t.amount
+  })
+
+  csvContent += 'CATEGORY BREAKDOWN\n'
+  csvContent += '───────────────────────────────────────────────────\n'
+  csvContent += 'Category,Type,Transaction Count,Total Amount\n'
+  
+  Object.entries(categoryData).forEach(([category, data]) => {
+    csvContent += `"${category}","${data.type}","${data.count}","${formatCurrency(data.amount)}"\n`
+  })
+
+  csvContent += '\n'
+  csvContent += 'TRANSACTION DETAILS\n'
+  csvContent += '═══════════════════════════════════════════════════\n'
+
+  const headers = ['Date', 'Time', 'Description', 'Category', 'Type', 'Amount']
+  csvContent += headers.join(',') + '\n'
+  csvContent += '───────────────────────────────────────────────────\n'
+  
+  const rows = transactions
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .map(t => {
+      const dateObj = new Date(t.date)
+      const dateStr = formatDate(t.date)
+      const timeStr = dateObj.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      })
+      return [
+        dateStr,
+        timeStr,
+        t.description,
+        t.category,
+        t.type.charAt(0).toUpperCase() + t.type.slice(1),
+        formatCurrency(t.amount)
+      ]
+    })
+
+  rows.forEach(row => {
+    csvContent += row.map(cell => `"${cell}"`).join(',') + '\n'
+  })
+
+  csvContent += '\n═══════════════════════════════════════════════════\n'
+  csvContent += `Export Date: ${new Date().toLocaleString('en-IN')}\n`
+  csvContent += 'Data Format: Clear, Detailed, Ready for Analysis\n'
+
+  downloadFile(csvContent, `Zorvyn_Transactions_${getDayMonthYear()}.csv`, 'text/csv;charset=utf-8;')
 }
 
 export function exportToJSON(transactions: Transaction[]): void {

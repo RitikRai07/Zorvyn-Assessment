@@ -74,7 +74,7 @@ export function TransactionTable({
         <CardContent>
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="mb-6 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-2xl opacity-50" />
+              <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-secondary/20 rounded-full blur-2xl opacity-50" />
               <div className="relative rounded-2xl bg-linear-to-br from-muted/60 to-muted/30 p-6">
                 <ArrowDown className="w-12 h-12 text-muted-foreground/30" />
               </div>

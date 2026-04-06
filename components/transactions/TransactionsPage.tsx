@@ -5,7 +5,7 @@ import { useFinance } from '@/lib/hooks/useFinance'
 import { Button } from '@/components/ui/button'
 import { Transaction } from '@/lib/types'
 import { TransactionFilters } from './TransactionFilters'
-import { TransactionTable } from './TransactionTable'
+import { TransactionsPremiumTable } from './TransactionsPremiumTable'
 import { TransactionForm } from './TransactionForm'
 import { filterTransactions } from '@/lib/utils/calculations'
 import { Plus, ArrowRightLeft, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
@@ -145,7 +145,7 @@ export function TransactionsPage() {
       <TransactionFilters transactions={transactions} />
 
       {/* Transactions Table */}
-      <TransactionTable
+      <TransactionsPremiumTable
         transactions={filteredTransactions}
         role={role}
         onEdit={handleEditClick}
