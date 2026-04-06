@@ -4,8 +4,6 @@ import { useFinance } from '@/lib/hooks/useFinance'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
 import { FloatingChatbot } from './FloatingChatbot'
-import { FloatingGoalsPanel } from './FloatingGoalsPanel'
-import { SessionActivityIndicator } from './SessionActivityIndicator'
 import { InactivityWarning } from './InactivityWarning'
 import { useSessionActivity } from '@/hooks/useSessionActivity'
 import { useState, useCallback } from 'react'
@@ -60,17 +58,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         onLogout={handleLogout}
       />
 
-      {/* Session Activity Indicator - Floating */}
-      <SessionActivityIndicator 
-        isInactive={isInactive}
-        timeUntilLogout={timeRemaining || 0}
-      />
-
       {/* Floating Chatbot - Always Visible */}
       <FloatingChatbot transactions={transactions} role={role} />
-
-      {/* Floating Goals Panel - Always Visible */}
-      <FloatingGoalsPanel />
     </div>
   )
 }

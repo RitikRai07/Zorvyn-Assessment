@@ -9,10 +9,8 @@ import { TipSection } from '@/components/TipSection'
 import { QuickStats } from './QuickStats'
 import { SpendingAnalytics } from './SpendingAnalytics'
 import { TimeGreeting } from './TimeGreeting'
-import { AdminActiveTime } from './AdminActiveTime'
 import { BudgetPlanner } from './BudgetPlanner'
 import { BillingReports } from './BillingReports'
-import { AdminSharePanel } from '@/components/AdminSharePanel'
 import { calculateTotalBalance } from '@/lib/utils/mockData'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -52,12 +50,6 @@ export function DashboardOverview() {
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-8 mt-8">
-
-        {/* Admin Activity Tracking - Only for Admin */}
-        <AdminActiveTime />
-
-        {/* Admin Share Link Panel - Only for Admin */}
-        {role === 'admin' && <AdminSharePanel />}
 
         {/* Summary Cards with Better Spacing */}
         <div>

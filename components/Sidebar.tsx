@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useFinance } from '@/lib/hooks/useFinance'
-import { BarChart3, LayoutDashboard, TrendingUp, Crown, Eye, LogOut, Settings } from 'lucide-react'
+import { BarChart3, LayoutDashboard, TrendingUp, Crown, Eye, LogOut, Settings, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import { SidebarSharePanel } from './SidebarSharePanel'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,6 +113,17 @@ export function Sidebar() {
           )
         })}
       </nav>
+
+      {/* Admin Share Session Links - Only for Admin */}
+      {role === 'admin' && (
+        <div className="px-4 py-3 border-y border-border/30">
+          <div className="flex items-center gap-2 mb-3">
+            <Share2 className="w-4 h-4 text-primary" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">🔗 Share Links</h3>
+          </div>
+          <SidebarSharePanel />
+        </div>
+      )}
 
       {/* Helpful Tip */}
       <div className="p-3 border-t border-border/30">
