@@ -143,10 +143,10 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
     return `✨ **Smart Question!** 💭\n\nI have full knowledge of:\n📊 Your dashboard & features\n💰 All transactions & analytics\n🎯 Goals & targets\n📈 Spending patterns\n🏢 Zorvyn capabilities\n\n**I can help with:**\n• Zorvyn info & features\n• Goals management\n• Budget planning\n• Spending analysis\n• Financial tips\n• Recommendations\n• Share links\n• Dashboard guidance\n\nWhat would you like to know? 🚀`
   }
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return
+  const handleSendMessage = () => {
+    if (!inputValue.trim() || isLoading) return
 
-    const userMessage = inputValue
+    const userMessage = inputValue.trim()
     setInputValue('')
 
     // Add user message
@@ -161,7 +161,7 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
     setIsLoading(true)
 
     // Simulate typing delay
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const botResponse = generateBotResponse(userMessage)
       const newBotMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -172,6 +172,9 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
       setMessages(prev => [...prev, newBotMessage])
       setIsLoading(false)
     }, 500)
+
+    // Cleanup timer on unmount
+    return () => clearTimeout(timer)
   }
 
   return (
@@ -278,20 +281,30 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
                     placeholder="Ask about Zorvyn, Goals, Budget..."
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                    disabled={isLoading}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && !isLoading && inputValue.trim()) {
+                        handleSendMessage()
+                      }
+                    }}
+                    disabled={false}
                     className="text-sm border-primary/30 focus:border-primary focus:ring-primary/50 rounded-lg"
                   />
                   <Button
                     size="icon"
                     onClick={() => {
-                      handleSendMessage()
-                      playSound('send')
+                      if (!isLoading && inputValue.trim()) {
+                        handleSendMessage()
+                        playSound('send')
+                      }
                     }}
                     disabled={isLoading || !inputValue.trim()}
                     className="shrink-0 bg-linear-to-r from-primary to-secondary hover:scale-105 transition-transform"
                   >
-                    <Send className="w-4 h-4" />
+                    {isLoading ? (
+                      <div className="w-4 h-4 border-2 border-primary/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
                   </Button>
                 </div>
               </>

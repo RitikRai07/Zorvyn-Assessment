@@ -90,19 +90,17 @@ export function TransactionsPage() {
               View and manage your financial transactions
             </p>
           </div>
-          {role === 'admin' && (
-            <Button
-              onClick={() => {
-                setEditingTransaction(null)
-                setFormOpen(true)
-              }}
-              className="gap-2 w-full sm:w-auto"
-              size="lg"
-            >
-              <Plus className="w-4 h-4" />
-              Add Transaction
-            </Button>
-          )}
+          <Button
+            onClick={() => {
+              setEditingTransaction(null)
+              setFormOpen(true)
+            }}
+            className="gap-2 w-full sm:w-auto"
+            size="lg"
+          >
+            <Plus className="w-4 h-4" />
+            Add Transaction
+          </Button>
         </div>
 
         {/* Quick Stats */}
