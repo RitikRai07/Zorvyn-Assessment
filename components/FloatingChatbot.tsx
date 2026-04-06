@@ -337,35 +337,39 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
   function playSound(type: 'open' | 'close' | 'send') {
     if (typeof window === 'undefined') return
     
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
-    
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
-    
-    switch (type) {
-      case 'open':
-        oscillator.frequency.value = 800
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
-        oscillator.start(audioContext.currentTime)
-        oscillator.stop(audioContext.currentTime + 0.3)
-        break
-      case 'close':
-        oscillator.frequency.value = 600
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
-        oscillator.start(audioContext.currentTime)
-        oscillator.stop(audioContext.currentTime + 0.2)
-        break
-      case 'send':
-        oscillator.frequency.value = 1000
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15)
-        oscillator.start(audioContext.currentTime)
-        oscillator.stop(audioContext.currentTime + 0.15)
-        break
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const now = audioContext.currentTime
+      
+      const createTone = (freq: number, duration: number, startTime: number, volume: number = 0.2) => {
+        const osc = audioContext.createOscillator()
+        const gain = audioContext.createGain()
+        osc.type = 'sine'
+        osc.frequency.value = freq
+        osc.connect(gain)
+        gain.connect(audioContext.destination)
+        gain.gain.setValueAtTime(volume, startTime)
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
+        osc.start(startTime)
+        osc.stop(startTime + duration)
+      }
+      
+      if (type === 'open') {
+        // Cheerful opening sound - 3 ascending notes
+        createTone(523, 0.15, now, 0.2) // C5
+        createTone(659, 0.15, now + 0.1, 0.2) // E5
+        createTone(784, 0.2, now + 0.2, 0.2) // G5
+      } else if (type === 'close') {
+        // Soft closing sound - 2 descending notes
+        createTone(659, 0.15, now, 0.15) // E5
+        createTone(523, 0.2, now + 0.1, 0.15) // C5
+      } else if (type === 'send') {
+        // Quick notification send sound
+        createTone(784, 0.08, now, 0.15) // G5
+        createTone(880, 0.12, now + 0.08, 0.15) // A5
+      }
+    } catch (e) {
+      // Audio context not available
     }
   }
 }

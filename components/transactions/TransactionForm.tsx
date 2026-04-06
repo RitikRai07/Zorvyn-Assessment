@@ -66,26 +66,43 @@ export function TransactionForm({
   const playTransactionSound = (type: 'income' | 'expense') => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const oscillator = audioContext.createOscillator()
-      const gainNode = audioContext.createGain()
-      
-      oscillator.connect(gainNode)
-      gainNode.connect(audioContext.destination)
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+      const now = audioContext.currentTime
       
       if (type === 'income') {
-        // Happy sound for income - ascending tones
-        oscillator.frequency.setValueAtTime(500, audioContext.currentTime)
-        oscillator.frequency.linearRampToValueAtTime(800, audioContext.currentTime + 0.3)
-        oscillator.start(audioContext.currentTime)
-        oscillator.stop(audioContext.currentTime + 0.5)
+        // Happy ascending chord for income - C major (C-E-G)
+        const createTone = (freq: number) => {
+          const osc = audioContext.createOscillator()
+          const gain = audioContext.createGain()
+          osc.type = 'sine'
+          osc.frequency.value = freq
+          osc.connect(gain)
+          gain.connect(audioContext.destination)
+          gain.gain.setValueAtTime(0.15, now)
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5)
+          osc.start(now)
+          osc.stop(now + 0.5)
+        }
+        // C major notes: C(262) E(330) G(392)
+        createTone(262) // C
+        setTimeout(() => createTone(330), 100) // E
+        setTimeout(() => createTone(392), 200) // G
       } else {
-        // Alert sound for expense - descending tone
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
-        oscillator.frequency.linearRampToValueAtTime(400, audioContext.currentTime + 0.4)
-        oscillator.start(audioContext.currentTime)
-        oscillator.stop(audioContext.currentTime + 0.5)
+        // Alert descending tone for expense - with warble effect
+        const osc = audioContext.createOscillator()
+        const gain = audioContext.createGain()
+        osc.type = 'sine'
+        
+        osc.frequency.setValueAtTime(800, now)
+        osc.frequency.linearRampToValueAtTime(500, now + 0.4)
+        
+        osc.connect(gain)
+        gain.connect(audioContext.destination)
+        gain.gain.setValueAtTime(0.2, now)
+        gain.gain.linearRampToValueAtTime(0.1, now + 0.2)
+        gain.gain.linearRampToValueAtTime(0.02, now + 0.4)
+        
+        osc.start(now)
+        osc.stop(now + 0.4)
       }
     } catch (e) {
       // Audio context not available
