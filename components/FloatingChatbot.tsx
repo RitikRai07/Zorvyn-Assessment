@@ -92,8 +92,9 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
 
     if (lowerMessage.includes('saving') || lowerMessage.includes('savings') || lowerMessage.includes('save')) {
       const savingsAmount = netIncome
-      const savingsPercent = (savingsRate * 100).toFixed(1)
-      return `💎 **Savings Insights** 🏆\n\n💰 Total Saved: **${formatCurrency(savingsAmount)}**\n📊 Savings Rate: **${savingsPercent}%**\n🎯 Goal Rate: **20%**\n\n**Status:** ${savingsPercent >= 20 ? '✨ Excellent!' : savingsPercent >= 10 ? '👍 Good!' : '📈 Keep improving!'}\n\n**Action Items:**\n• Automate savings\n• Review Goals\n• Set milestones\n• Celebrate wins! 🎉`
+      const savingsPercentage = savingsRate * 100
+      const savingsPercent = savingsPercentage.toFixed(1)
+      return `💎 **Savings Insights** 🏆\n\n💰 Total Saved: **${formatCurrency(savingsAmount)}**\n📊 Savings Rate: **${savingsPercent}%**\n🎯 Goal Rate: **20%**\n\n**Status:** ${savingsPercentage >= 20 ? '✨ Excellent!' : savingsPercentage >= 10 ? '👍 Good!' : '📈 Keep improving!'}\n\n**Action Items:**\n• Automate savings\n• Review Goals\n• Set milestones\n• Celebrate wins! 🎉`
     }
 
     if (lowerMessage.includes('dashboard') || lowerMessage.includes('feature')) {
