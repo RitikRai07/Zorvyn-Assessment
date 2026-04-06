@@ -115,7 +115,7 @@ export function TransactionsPremiumTable({
     <div className="space-y-6 animate-fadeIn">
       {/* Stats Header */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-2 border-blue-200/50 dark:border-blue-800/50 bg-linear-to-br from-blue-50/50 to-blue-100/30 dark:from-blue-950/20 dark:to-blue-900/10">
+        <Card className="border-2 border-blue-200/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50/50 to-blue-100/30 dark:from-blue-950/20 dark:to-blue-900/10">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -129,7 +129,7 @@ export function TransactionsPremiumTable({
           </CardContent>
         </Card>
 
-        <Card className="border-2 border-green-200/50 dark:border-green-800/50 bg-linear-to-br from-green-50/50 to-green-100/30 dark:from-green-950/20 dark:to-green-900/10">
+        <Card className="border-2 border-green-200/50 dark:border-green-800/50 bg-gradient-to-br from-green-50/50 to-green-100/30 dark:from-green-950/20 dark:to-green-900/10">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -143,7 +143,7 @@ export function TransactionsPremiumTable({
           </CardContent>
         </Card>
 
-        <Card className="border-2 border-red-200/50 dark:border-red-800/50 bg-linear-to-br from-red-50/50 to-red-100/30 dark:from-red-950/20 dark:to-red-900/10">
+        <Card className="border-2 border-red-200/50 dark:border-red-800/50 bg-gradient-to-br from-red-50/50 to-red-100/30 dark:from-red-950/20 dark:to-red-900/10">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>

@@ -49,7 +49,7 @@ export function TransactionFilters({ transactions }: TransactionFiltersProps) {
 
   return (
     <Card className="animate-fadeIn border-border/50 overflow-hidden group">
-      <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       
       <CardHeader className="relative z-10 pb-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">

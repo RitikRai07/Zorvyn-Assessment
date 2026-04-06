@@ -79,7 +79,7 @@ export function TransactionsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-linear-to-br from-primary to-primary/60 rounded-lg">
+              <div className="p-2.5 bg-gradient-to-br from-primary to-primary/60 rounded-lg">
                 <ArrowRightLeft className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground">

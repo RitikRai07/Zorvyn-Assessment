@@ -199,9 +199,9 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
       {/* Chatbot Window - Enhanced */}
       {isOpen && (
         <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
-          isMinimized ? 'h-16' : 'h-[32rem]'
+          isMinimized ? 'h-16' : 'h-96'
         } w-96 animate-slideInRight`}>
-          <Card className="w-full h-full flex flex-col shadow-2xl border-2 border-primary/30 bg-gradient-to-b from-background to-background/95">
+          <Card className="w-full h-full flex flex-col shadow-2xl border-2 border-primary/30 bg-gradient-to-b from-background from-0% to-background/95 to-100%">
             {/* Header - Enhanced */}
             <CardHeader className="bg-linear-to-r from-primary via-secondary to-primary text-white shrink-0 rounded-t-lg shadow-lg border-b-2 border-primary/50">
               <div className="flex items-center justify-between">
@@ -243,7 +243,7 @@ export function FloatingChatbot({ transactions, role }: FloatingChatbotProps) {
             {/* Messages - Enhanced */}
             {!isMinimized && (
               <>
-                <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-background/50 to-background">
+                <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-background/50 from-0% to-background to-100%">
                   <div className="space-y-4">
                     {messages.map(message => (
                       <div
